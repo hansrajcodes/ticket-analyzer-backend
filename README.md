@@ -1,9 +1,9 @@
 # Travel Itinerary - Backend
 
 Node.js + Express + MongoDB REST API for an AI-powered travel itinerary
-generator. Uploaded booking documents are sent to Google Gemini, which extracts
-the bookings and produces a day-by-day itinerary. Originals are stored in
-AWS S3.
+generator. Uploaded booking documents are sent to Groq (OpenAI-compatible API),
+which extracts the bookings and produces a day-by-day itinerary. Originals are
+stored in AWS S3.
 
 ## Tech
 
@@ -11,7 +11,7 @@ AWS S3.
 - MongoDB (Mongoose)
 - JSON Web Tokens (auth)
 - AWS S3 (file storage, private bucket + signed URLs)
-- Google Gemini 1.5 Flash (multimodal - reads PDFs and images directly)
+- Groq (OpenAI-compatible chat completions, multimodal - reads PDFs and images directly)
 - Multer (multipart uploads)
 
 ## Folder structure
@@ -64,8 +64,8 @@ The API will be live on `http://localhost:5000`.
 | `MONGO_URI` | Mongo connection string |
 | `JWT_SECRET` | Long random string |
 | `JWT_EXPIRES_IN` | e.g. `7d` |
-| `GEMINI_API_KEY` | Google AI Studio key |
-| `GEMINI_MODEL` | e.g. `gemini-1.5-flash` |
+| `GROQ_API_KEY` | Groq API key (https://console.groq.com) |
+| `GROQ_MODEL` | e.g. `meta-llama/llama-4-scout-17b-16e-instruct` |
 | `AWS_ACCESS_KEY_ID` | IAM user with S3 access |
 | `AWS_SECRET_ACCESS_KEY` | matching secret |
 | `AWS_REGION` | e.g. `ap-south-1` |
