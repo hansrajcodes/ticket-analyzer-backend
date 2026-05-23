@@ -16,6 +16,7 @@ const llm = new OpenAI({
 });
 
 const MAX_IMAGES_PER_REQUEST = 5;
+const MAX_PDF_TEXT_CHARS = 60_000;
 
 const ITINERARY_PROMPT = `You are a travel concierge. The user will give you one or more travel
 booking documents (flight tickets, hotel confirmations, train/bus tickets,
@@ -172,20 +173,30 @@ const buildS3Key = (userId, originalName) => {
   return `users/${userId}/${stamp}-${rand}-${safe}`;
 };
 
-// Turn an uploaded file into one or more {mimeType, base64} image parts.
-// PDFs are rasterized page-by-page; images pass through.
-const fileToImageParts = async (file) => {
+// Turn an uploaded file into model-ready content parts.
+// PDFs are converted to extracted text; images pass through as image_url parts.
+const fileToContentParts = async (file) => {
   if (file.mimetype === "application/pdf") {
-    const { pdf } = await import("pdf-to-img");
-    const document = await pdf(file.buffer, { scale: 2 });
-    const pages = [];
-    for await (const pageBuffer of document) {
-      pages.push({ mimeType: "image/png", base64: pageBuffer.toString("base64") });
-    }
-    return pages;
+    const pdfParse = require("pdf-parse");
+    const parsed = await pdfParse(file.buffer);
+    const text = (parsed.text || "").trim().slice(0, MAX_PDF_TEXT_CHARS);
+    if (!text) return [];
+    return [
+      {
+        type: "text",
+        text: `--- PDF: ${file.originalname} ---\n${text}\n--- end of PDF ---`,
+      },
+    ];
   }
   if (file.mimetype && file.mimetype.startsWith("image/")) {
-    return [{ mimeType: file.mimetype, base64: file.buffer.toString("base64") }];
+    return [
+      {
+        type: "image_url",
+        image_url: {
+          url: `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+        },
+      },
+    ];
   }
   throw new Error(`Unsupported file type: ${file.mimetype}. Upload images or PDFs.`);
 };
@@ -199,19 +210,22 @@ exports.createItinerary = async (req, res, next) => {
       throw new Error("Please upload at least one booking document");
     }
 
-    // 1. Convert uploads to image parts (PDFs become one image per page)
-    const imageParts = [];
+    // 1. Convert uploads to model content parts (PDFs -> text, images -> image_url)
+    const contentParts = [];
+    let imageCount = 0;
     for (const f of files) {
-      const parts = await fileToImageParts(f);
-      imageParts.push(...parts);
+      const parts = await fileToContentParts(f);
+      for (const p of parts) {
+        if (p.type === "image_url") {
+          if (imageCount >= MAX_IMAGES_PER_REQUEST) continue;
+          imageCount += 1;
+        }
+        contentParts.push(p);
+      }
     }
-    if (imageParts.length === 0) {
+    if (contentParts.length === 0) {
       res.status(400);
-      throw new Error("Could not read any pages from the uploaded files");
-    }
-    if (imageParts.length > MAX_IMAGES_PER_REQUEST) {
-      // keep the first N pages so the model has the most important content
-      imageParts.length = MAX_IMAGES_PER_REQUEST;
+      throw new Error("Could not read any content from the uploaded files");
     }
 
     // 2. Send to the LLM (Groq, OpenAI-compatible API)
@@ -227,13 +241,7 @@ exports.createItinerary = async (req, res, next) => {
         { role: "system", content: ITINERARY_PROMPT },
         {
           role: "user",
-          content: [
-            { type: "text", text: userText },
-            ...imageParts.map((p) => ({
-              type: "image_url",
-              image_url: { url: `data:${p.mimeType};base64,${p.base64}` },
-            })),
-          ],
+          content: [{ type: "text", text: userText }, ...contentParts],
         },
       ],
     });
