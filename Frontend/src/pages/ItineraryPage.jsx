@@ -85,7 +85,8 @@ export default function ItineraryPage() {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Delete this itinerary? This cannot be undone.")) return;
+    if (!window.confirm("Delete this itinerary? This cannot be undone."))
+      return;
     try {
       await api.delete(`/itineraries/${id}`);
       toast.success("Deleted");
@@ -117,11 +118,26 @@ export default function ItineraryPage() {
       </div>
 
       {/* Action bar */}
+      {/* Share details */}
+      <div className="mb-3">
+        <h2 className="text-lg font-semibold text-ink-900 sm:text-xl">
+          Share details
+        </h2>
+        <p className="mt-1 text-sm text-ink-500">
+          Control visibility Private to Public and share this itinerary with others.
+        </p>
+      </div>
+
+      {/* Action bar */}
       <div className="surface mb-6 flex flex-wrap items-center gap-2 p-2 sm:p-2.5 animate-fade-in-up">
         <button
           onClick={handleToggleShare}
           disabled={busy}
-          title={itinerary.isPublic ? "Click to make private" : "Click to make public and share"}
+          title={
+            itinerary.isPublic
+              ? "Click to make private"
+              : "Click to make public and share"
+          }
           className={`inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
             itinerary.isPublic
               ? "bg-primary-50 text-primary-700 hover:bg-primary-100"
@@ -144,7 +160,8 @@ export default function ItineraryPage() {
               onClick={handleCopy}
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-ink-100 px-3 py-2 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-200 sm:flex-none"
             >
-              <Copy size={16} /> <span className="hidden sm:inline">Copy link</span>
+              <Copy size={16} />{" "}
+              <span className="hidden sm:inline">Copy link</span>
             </button>
             <button
               onClick={handleNativeShare}
@@ -186,7 +203,9 @@ export default function ItineraryPage() {
 
       {itinerary.files?.length > 0 && (
         <section className="mt-10 animate-fade-in-up">
-          <h2 className="mb-3 text-lg font-semibold text-ink-900">Source documents</h2>
+          <h2 className="mb-3 text-lg font-semibold text-ink-900">
+            Source documents
+          </h2>
           <ul className="space-y-2">
             {itinerary.files.map((f, i) => (
               <li

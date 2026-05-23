@@ -68,17 +68,3 @@ Visit http://localhost:5173.
 npm run build
 npm run preview
 ```
-
-The production bundle is written to `dist/`.
-
-## Pages
-
-| Path | Auth | Purpose |
-| --- | --- | --- |
-| `/` | - | Landing page |
-| `/login` | - | Email/password login |
-| `/register` | - | Create an account |
-| `/dashboard` | Yes | List of past itineraries |
-| `/itineraries/new` | Yes | Drag & drop upload + AI generation |
-| `/itineraries/:id` | Yes | Itinerary detail + share toggle |
-| `/share/:token` | - | Public read-only itinerary |
