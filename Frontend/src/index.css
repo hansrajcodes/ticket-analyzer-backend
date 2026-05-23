@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-ink-50 text-ink-900 antialiased;
+  font-family: "Inter", system-ui, sans-serif;
+  background-image:
+    radial-gradient(1000px 600px at 100% -10%, rgba(124, 58, 237, 0.06), transparent 60%),
+    radial-gradient(800px 500px at -10% 10%, rgba(42, 75, 224, 0.06), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Reusable component classes */
+@layer components {
+  .surface {
+    @apply rounded-2xl bg-white shadow-card;
+  }
+  .surface-pop {
+    @apply rounded-2xl bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-pop;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-gradient px-5 py-2.5
+           text-sm font-semibold text-white shadow-glow transition-all duration-200
+           hover:-translate-y-0.5 hover:shadow-pop active:translate-y-0
+           disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5
+           text-sm font-semibold text-ink-700 shadow-soft transition-all duration-200
+           hover:bg-ink-50 hover:shadow-card disabled:opacity-60;
+  }
+  .btn-subtle {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-ink-100 px-4 py-2
+           text-sm font-medium text-ink-700 transition-colors hover:bg-ink-200;
+  }
+  .input {
+    @apply w-full rounded-xl bg-ink-50 px-4 py-3 text-sm text-ink-900 placeholder:text-ink-500
+           shadow-ring transition-all duration-150
+           focus:bg-white focus:shadow-card focus:outline-none focus:ring-2 focus:ring-primary-300/60;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-ink-100 px-3 py-1
+           text-xs font-medium text-ink-700;
+  }
+  .chip-primary {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1
+           text-xs font-medium text-primary-700;
+  }
+  .chip-accent {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-accent-50 px-3 py-1
+           text-xs font-medium text-accent-700;
+  }
+}
+
+/* Hide scrollbars on horizontal scroll containers */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
